@@ -3,9 +3,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app import models
 from app.config import settings
 from app.database import Base, get_db
 from app.main import app
+from app.oauth2 import create_access_token
 
 # postgresql://<username>:<password>@<host>[:<port>]/<database>
 SQLALCHEMY_DB_URL = (
@@ -58,3 +60,45 @@ def test_user(client):
     new_user = res.json()
     new_user["password"] = user_data["password"]
     return new_user
+
+
+@pytest.fixture
+def test_user2(client):
+    # first create a user
+    user_data = {"email": "daya1@cid.com", "password": "daya123"}
+    res = client.post("/users/", json=user_data)
+
+    assert res.status_code == 201
+
+    # append the password to the response
+    new_user = res.json()
+    new_user["password"] = user_data["password"]
+    return new_user
+
+
+@pytest.fixture
+def token(test_user):
+    return create_access_token({"user_id": test_user["id"]})
+
+
+@pytest.fixture
+def authorized_client(client, token):
+    client.headers = {**client.headers, "Authorization": f"Bearer {token}"}
+    return client
+
+
+@pytest.fixture
+def test_posts(session, test_user, test_user2):
+    posts_data = [
+        {"title": "Title 1", "content": "Content 1", "owner_id": test_user["id"]},
+        {"title": "Title 2", "content": "Content 2", "owner_id": test_user["id"]},
+        {"title": "Title 3", "content": "Content 3", "owner_id": test_user["id"]},
+        {"title": "Title 4", "content": "Content 4", "owner_id": test_user2["id"]},
+    ]
+
+    posts_data = list(map(lambda post: models.Post(**post), posts_data))
+    session.add_all(posts_data)
+    session.commit()
+
+    posts = session.query(models.Post).all()
+    return posts

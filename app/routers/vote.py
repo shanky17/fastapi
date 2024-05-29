@@ -20,6 +20,7 @@ def vote(
             detail=f"Post {vote.post_id} does not exist",
         )
 
+    # checking if the post is already voted
     vote_query = db.query(models.Vote).filter(
         models.Vote.post_id == vote.post_id, models.Vote.user_id == current_user.id
     )
