@@ -8,5 +8,11 @@ jobs:
         steps:
             - name: Pulling source code
               uses: actions/checkout@v2
-            - name: Echoing!!!
-              run: echo "Hello World"
+            - name: Install python version 3.9
+              uses: actions/setup-python@v2
+              with:
+                  python-version: "3.9"
+            - name: Update pip
+              run: python -m pip install --upgrade pip
+            - name: Install dependencies
+              run: pip install -r requirements.txt
