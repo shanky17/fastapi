@@ -93,5 +93,6 @@ jobs:
                   username: ${{ secrets.PROD_USERNAME }}
                   key: ${{ secrets.PRIVATE_KEY }}
                   script: |
-                      whoami
-                      ls -l
+                      cd app/src
+                      git pull
+                      echo ${{ secrets.PROD_PASSWORD }} | sudo -S systemctl restart fastapi
