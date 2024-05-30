@@ -80,9 +80,9 @@ jobs:
             name: production
 
         steps:
-            - name: Deploy
-              uses: bankfliptech/deploy-to-render@v1
+            - name: Deploy to production
+              uses: johnbeynon/render-deploy-action@v0.0.8
               with:
                   serviceId: ${{ secrets.SERVICE_ID }}
                   apiKey: ${{ secrets.RENDER_API_KEY }}
-                  deployHookURL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+                  wait-for-success: true
